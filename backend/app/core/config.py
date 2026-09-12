@@ -19,6 +19,13 @@ class Settings(BaseSettings):
     fcm_max_attempts: int = Field(default=5, ge=1, le=10)
     fcm_retry_base_seconds: int = Field(default=30, ge=1, le=3_600)
     fcm_request_timeout_seconds: int = Field(default=15, ge=1, le=120)
+    scheduler_enabled: bool = True
+    rainfall_processing_interval_seconds: int = Field(default=60, ge=5, le=3_600)
+    notification_retry_interval_seconds: int = Field(default=30, ge=5, le=3_600)
+    scheduler_batch_size: int = Field(default=100, ge=1, le=1_000)
+    rainfall_processing_max_attempts: int = Field(default=3, ge=1, le=10)
+    rainfall_processing_retry_seconds: int = Field(default=30, ge=1, le=3_600)
+    rainfall_processing_claim_timeout_seconds: int = Field(default=300, ge=30, le=3_600)
 
     model_config = SettingsConfigDict(
         env_file=".env",

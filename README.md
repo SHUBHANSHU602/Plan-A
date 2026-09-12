@@ -62,6 +62,31 @@ The subscription endpoints currently share the prototype's unauthenticated API
 boundary. Put the service behind a trusted gateway until application authentication
 and per-user authorization are implemented.
 
+## Rainfall operations and simulation
+
+External rainfall adapters enqueue idempotent updates with
+`POST /api/v1/rainfall/observations`; the `(source, source_event_id)` pair prevents
+duplicate processing. The scheduler claims due observations, runs the same persisted
+risk/alert/notification pipeline used by `POST /api/v1/predict`, and retries transient
+processing failures with bounded backoff. Stale claims are recoverable after the
+configured timeout.
+
+`POST /api/v1/simulation/rainfall` multiplies either the latest persisted rainfall or
+an explicitly supplied baseline and returns the resulting prediction and alert. The
+temporary mock gateway is rainfall-responsive for demo integration only; its
+coefficients are not scientific thresholds and must be replaced by the trained model
+adapter before real-world use.
+
+Both operational endpoints currently use the prototype's trusted-gateway boundary.
+They can create alerts and dispatch configured notification channels, so production
+deployments must restrict them to authenticated ingestion workers and administrators;
+run simulations with sandbox notification recipients.
+
+APScheduler starts with the API process by default. It coalesces missed intervals and
+limits each job to one local instance; database row claiming protects queued work
+when multiple API replicas run. Disable background processing with
+`SCHEDULER_ENABLED=false` when running a dedicated scheduler process.
+
 ## Run with Docker
 
 ```bash

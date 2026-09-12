@@ -9,6 +9,7 @@ description = "Backend API for the Plan-A landslide early-warning platform"
 requires-python = ">=3.11"
 dependencies = [
     "alembic>=1.14,<2.0",
+    "apscheduler>=3.11,<4.0",
     "fastapi>=0.115,<1.0",
     "firebase-admin>=7.0,<8.0",
     "geoalchemy2>=0.16,<1.0",
