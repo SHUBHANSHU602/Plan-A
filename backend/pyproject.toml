@@ -8,7 +8,12 @@ version = "0.1.0"
 description = "Backend API for the Plan-A landslide early-warning platform"
 requires-python = ">=3.11"
 dependencies = [
+    "alembic>=1.14,<2.0",
     "fastapi>=0.115,<1.0",
+    "geoalchemy2>=0.16,<1.0",
+    "psycopg[binary]>=3.2,<4.0",
+    "pydantic-settings>=2.7,<3.0",
+    "sqlalchemy[asyncio]>=2.0.36,<3.0",
     "uvicorn[standard]>=0.30,<1.0",
 ]
 
@@ -25,6 +30,9 @@ include = ["app*"]
 
 [tool.pytest.ini_options]
 addopts = "-q"
+markers = [
+    "integration: requires a running PostgreSQL/PostGIS database",
+]
 pythonpath = ["."]
 testpaths = ["tests"]
 
