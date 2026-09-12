@@ -29,8 +29,8 @@ async def seed_alert_data() -> None:
                 VALUES (
                     :id, :cell_code,
                     ST_GeomFromText(
-                        'POLYGON((93.74 27.14, 93.76 27.14, 93.76 27.16, '
-                        '93.74 27.16, 93.74 27.14))',
+                        'POLYGON((88.00 26.00, 88.02 26.00, 88.02 26.02, '
+                        '88.00 26.02, 88.00 26.00))',
                         4326
                     ),
                     213, 50.76, 22.93
@@ -47,7 +47,7 @@ async def seed_alert_data() -> None:
                 )
                 VALUES (
                     :id, :asset_code, 'Alert Test Hospital', 'HOSPITAL', 5,
-                    ST_GeomFromText('POINT(93.75 27.15)', 4326)
+                    ST_GeomFromText('POINT(88.01 26.01)', 4326)
                 )
                 """
             ),
@@ -108,6 +108,15 @@ async def assert_concurrent_alert_deduplication() -> None:
         assert stored["exposure"]["total_assets"] == 1
         assert stored["exposure"]["critical_assets"] == 1
     finally:
+        async with engine.begin() as connection:
+            await connection.execute(
+                text("DELETE FROM assets WHERE asset_code = :asset_code"),
+                {"asset_code": f"alert-hospital-{cell_id}"},
+            )
+            await connection.execute(
+                text("DELETE FROM risk_cells WHERE id = :cell_id"),
+                {"cell_id": cell_id},
+            )
         await engine.dispose()
 
 
