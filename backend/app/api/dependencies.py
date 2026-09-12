@@ -5,7 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.db.session import get_db_session
+from app.repositories.exposure import AssetRepository
 from app.repositories.risk import RiskCellRepository, RiskSnapshotRepository
+from app.services.exposure_service import ExposureService
 from app.services.model_gateway import MockModelGateway, ModelGateway
 from app.services.risk_classifier import RiskClassifier, RiskThresholds
 from app.services.risk_service import RiskService
@@ -34,4 +36,13 @@ def get_risk_service(
         snapshot_repository=RiskSnapshotRepository(session),
         model_gateway=gateway,
         classifier=classifier,
+    )
+
+
+def get_exposure_service(
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> ExposureService:
+    return ExposureService(
+        cell_repository=RiskCellRepository(session),
+        asset_repository=AssetRepository(session),
     )
