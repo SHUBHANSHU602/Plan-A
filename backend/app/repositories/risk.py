@@ -17,6 +17,9 @@ class RiskCellRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
+    async def get_by_code(self, cell_code: str) -> RiskCell | None:
+        return await self._session.scalar(select(RiskCell).where(RiskCell.cell_code == cell_code))
+
     async def get_feature_set(self, cell_code: str) -> RiskCellFeatureSet | None:
         centroid = func.ST_Centroid(RiskCell.geometry)
         statement = select(
