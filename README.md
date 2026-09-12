@@ -44,6 +44,24 @@ The stream is a best-effort live transport. A reconnecting client must use
 prototype has no WebSocket authentication, so production deployments must keep it
 behind a trusted gateway until application authentication is added.
 
+## Push notifications
+
+Clients register an FCM installation ID with
+`POST /api/v1/notifications/subscriptions` and may deactivate it with
+`DELETE /api/v1/notifications/subscriptions/{subscription_id}`. Installation IDs
+are stored for delivery but are never returned by the API. Delivery outcomes are
+available from `GET /api/v1/notifications/deliveries?alert_id={alert_id}`.
+
+FCM is disabled by default. Enable it with `FCM_ENABLED=true`, set
+`FCM_PROJECT_ID`, and provide Google Application Default Credentials through the
+deployment environment. Never commit a service-account JSON file. Transient failures
+use bounded exponential backoff; invalid/expired targets are deactivated. PR9 wires
+the exposed retry operation into the application scheduler.
+
+The subscription endpoints currently share the prototype's unauthenticated API
+boundary. Put the service behind a trusted gateway until application authentication
+and per-user authorization are implemented.
+
 ## Run with Docker
 
 ```bash

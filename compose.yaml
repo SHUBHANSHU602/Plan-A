@@ -4,6 +4,11 @@ services:
       context: ./backend
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://plan_a:plan_a_local@db:5432/plan_a}
+      FCM_ENABLED: ${FCM_ENABLED:-false}
+      FCM_PROJECT_ID: ${FCM_PROJECT_ID:-}
+      FCM_MAX_ATTEMPTS: ${FCM_MAX_ATTEMPTS:-5}
+      FCM_RETRY_BASE_SECONDS: ${FCM_RETRY_BASE_SECONDS:-30}
+      FCM_REQUEST_TIMEOUT_SECONDS: ${FCM_REQUEST_TIMEOUT_SECONDS:-15}
     ports:
       - "8000:8000"
     depends_on:

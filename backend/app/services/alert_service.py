@@ -123,6 +123,8 @@ class AlertService:
             event_created_at=event.created_at if event else None,
             action=action,
             severity=severity,
+            title=alert.title,
+            message=alert.message,
             occurrence_count=alert.occurrence_count,
         )
 

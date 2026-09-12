@@ -28,6 +28,12 @@ async def assert_database_schema() -> None:
             risk_snapshots_table = await connection.scalar(
                 text("SELECT to_regclass('public.risk_snapshots')")
             )
+            notification_subscriptions_table = await connection.scalar(
+                text("SELECT to_regclass('public.notification_subscriptions')")
+            )
+            alert_deliveries_table = await connection.scalar(
+                text("SELECT to_regclass('public.alert_deliveries')")
+            )
 
             await connection.execute(
                 text(
@@ -75,6 +81,8 @@ async def assert_database_schema() -> None:
         assert postgis_version
         assert risk_cells_table == "risk_cells"
         assert risk_snapshots_table == "risk_snapshots"
+        assert notification_subscriptions_table == "notification_subscriptions"
+        assert alert_deliveries_table == "alert_deliveries"
         assert stored_probability == pytest.approx(0.87)
     finally:
         await engine.dispose()

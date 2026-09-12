@@ -97,6 +97,8 @@ class RiskService:
                         "status": "ACTIVE",
                         "probability": snapshot.probability,
                         "drivers": snapshot.drivers,
+                        "title": alert.title,
+                        "message": alert.message,
                     },
                 )
             await self._transaction.commit()
