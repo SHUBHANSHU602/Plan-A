@@ -44,6 +44,7 @@ class AlertRepository:
     async def save(self, alert: Alert) -> Alert:
         self._session.add(alert)
         await self._session.flush()
+        await self._session.refresh(alert)
         return alert
 
     async def get_for_update(self, alert_id: UUID) -> Alert | None:
