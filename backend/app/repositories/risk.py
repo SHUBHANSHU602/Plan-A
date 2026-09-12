@@ -47,7 +47,7 @@ class RiskSnapshotRepository:
     async def save(self, snapshot: RiskSnapshot) -> RiskSnapshot:
         self._session.add(snapshot)
         try:
-            await self._session.commit()
+            await self._session.flush()
             await self._session.refresh(snapshot)
         except Exception:
             await self._session.rollback()
