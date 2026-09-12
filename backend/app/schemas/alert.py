@@ -46,6 +46,8 @@ class AlertActorType(StrEnum):
 
 class AlertEvaluation(BaseModel):
     alert_id: UUID
+    event_id: UUID | None = None
+    event_created_at: datetime | None = None
     action: AlertAction
     severity: AlertSeverity
     occurrence_count: int = Field(ge=1)

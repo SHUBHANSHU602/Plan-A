@@ -32,6 +32,18 @@ Open <http://127.0.0.1:8000/health> or the generated API documentation at
 `/health` is a liveness probe and does not touch the database. `/health/ready`
 checks database availability and should be used as the deployment readiness probe.
 
+## Live alert stream
+
+Dashboard clients connect to `ws://127.0.0.1:8000/ws/alerts`. The server first sends
+`{"type":"connection.ready","version":"1"}` and then emits committed alert creation,
+refresh, escalation, and lifecycle events as `alert.event` messages. Clients may send
+`{"type":"ping"}` and receive `{"type":"pong"}`.
+
+The stream is a best-effort live transport. A reconnecting client must use
+`GET /api/v1/alerts` to reconcile anything missed while disconnected. The current
+prototype has no WebSocket authentication, so production deployments must keep it
+behind a trusted gateway until application authentication is added.
+
 ## Run with Docker
 
 ```bash
