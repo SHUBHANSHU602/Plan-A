@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     risk_medium_threshold: float = 0.40
     risk_high_threshold: float = 0.65
     risk_critical_threshold: float = 0.80
+    alert_exposure_radius_m: float = Field(default=2_000, gt=0, le=50_000)
+    alert_dedup_cooldown_minutes: int = Field(default=30, ge=1, le=1_440)
 
     model_config = SettingsConfigDict(
         env_file=".env",
