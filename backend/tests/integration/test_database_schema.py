@@ -52,9 +52,13 @@ async def assert_database_schema() -> None:
                 text(
                     """
                     INSERT INTO risk_snapshots (
-                        id, cell_id, probability, predicted_class, drivers
+                        id, cell_id, probability, predicted_class,
+                        rainfall_mm, risk_level, drivers
                     )
-                    VALUES (:id, :cell_id, 0.87, 1, CAST(:drivers AS jsonb))
+                    VALUES (
+                        :id, :cell_id, 0.87, 1,
+                        115.34, 'CRITICAL', CAST(:drivers AS jsonb)
+                    )
                     """
                 ),
                 {
