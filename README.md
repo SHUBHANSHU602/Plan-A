@@ -22,11 +22,15 @@ Plan-A/
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e './backend[test]'
+alembic -c backend/alembic.ini upgrade head
 uvicorn app.main:app --app-dir backend --reload
 ```
 
 Open <http://127.0.0.1:8000/health> or the generated API documentation at
 <http://127.0.0.1:8000/docs>.
+
+`/health` is a liveness probe and does not touch the database. `/health/ready`
+checks database availability and should be used as the deployment readiness probe.
 
 ## Run with Docker
 

@@ -9,6 +9,8 @@ RUN addgroup --system app && adduser --system --ingroup app app
 
 COPY pyproject.toml ./
 COPY app ./app
+COPY alembic.ini ./
+COPY migrations ./migrations
 
 RUN python -m pip install --no-cache-dir .
 
