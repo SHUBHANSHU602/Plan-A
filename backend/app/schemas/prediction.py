@@ -5,6 +5,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from app.schemas.alert import AlertEvaluation
+
 
 class RiskLevel(StrEnum):
     LOW = "LOW"
@@ -43,3 +45,4 @@ class PredictionResponse(BaseModel):
     rainfall_mm: float = Field(ge=0)
     drivers: list[str]
     recorded_at: datetime
+    alert: AlertEvaluation | None = None
