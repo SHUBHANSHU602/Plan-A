@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.core.config import get_settings
 from app.db.base import Base
-from app.models import Alert, Asset, RiskCell, RiskSnapshot  # noqa: F401
+from app.models import Alert, AlertEvent, Asset, RiskCell, RiskSnapshot  # noqa: F401
 
 config = context.config
 

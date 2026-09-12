@@ -7,9 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.db.session import get_db_session
 from app.db.transaction import TransactionManager
-from app.repositories.alert import AlertRepository
+from app.repositories.alert import AlertEventRepository, AlertRepository
 from app.repositories.exposure import AssetRepository
 from app.repositories.risk import RiskCellRepository, RiskSnapshotRepository
+from app.services.alert_management_service import AlertManagementService
 from app.services.alert_policy import AlertPolicy
 from app.services.alert_service import AlertService
 from app.services.exposure_service import ExposureService
@@ -44,6 +45,7 @@ def get_risk_service(
         classifier=classifier,
         alert_service=AlertService(
             repository=AlertRepository(session),
+            event_repository=AlertEventRepository(session),
             asset_repository=asset_repository,
             policy=AlertPolicy(),
             exposure_radius_m=settings.alert_exposure_radius_m,
@@ -59,4 +61,14 @@ def get_exposure_service(
     return ExposureService(
         cell_repository=RiskCellRepository(session),
         asset_repository=AssetRepository(session),
+    )
+
+
+def get_alert_management_service(
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> AlertManagementService:
+    return AlertManagementService(
+        alert_repository=AlertRepository(session),
+        event_repository=AlertEventRepository(session),
+        transaction=TransactionManager(session),
     )
