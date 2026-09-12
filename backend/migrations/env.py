@@ -17,6 +17,12 @@ config.set_main_option("sqlalchemy.url", get_settings().database_url)
 target_metadata = Base.metadata
 
 
+def include_object(_object, _name, type_, reflected, compare_to) -> bool:
+    # PostGIS installs extension-owned tables that do not belong to this application.
+    # Never let autogenerate propose destructive drops for database-only tables.
+    return not (type_ == "table" and reflected and compare_to is None)
+
+
 def run_migrations_offline() -> None:
     context.configure(
         url=config.get_main_option("sqlalchemy.url"),
@@ -24,6 +30,7 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         compare_type=True,
+        include_object=include_object,
     )
 
     with context.begin_transaction():
@@ -35,6 +42,7 @@ def do_run_migrations(connection) -> None:
         connection=connection,
         target_metadata=target_metadata,
         compare_type=True,
+        include_object=include_object,
     )
 
     with context.begin_transaction():
