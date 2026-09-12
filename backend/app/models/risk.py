@@ -53,7 +53,16 @@ class RiskSnapshot(Base):
             "predicted_class IN (0, 1)",
             name="predicted_class_binary",
         ),
+        CheckConstraint(
+            "rainfall_mm IS NULL OR rainfall_mm >= 0",
+            name="rainfall_non_negative",
+        ),
+        CheckConstraint(
+            "risk_level IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')",
+            name="risk_level_valid",
+        ),
         Index("ix_risk_snapshots_cell_recorded", "cell_id", "recorded_at"),
+        Index("ix_risk_snapshots_level_recorded", "risk_level", "recorded_at"),
     )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -63,6 +72,8 @@ class RiskSnapshot(Base):
     )
     probability: Mapped[float] = mapped_column(Float)
     predicted_class: Mapped[int] = mapped_column(SmallInteger)
+    rainfall_mm: Mapped[float | None] = mapped_column(Float)
+    risk_level: Mapped[str] = mapped_column(String(16))
     drivers: Mapped[list[str]] = mapped_column(
         JSONB,
         default=list,
