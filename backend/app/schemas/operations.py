@@ -55,6 +55,10 @@ class RainfallSimulationRequest(BaseModel):
     cell_code: str = Field(min_length=1, max_length=64)
     rainfall_multiplier: float = Field(gt=0, le=10)
     baseline_rainfall_mm: float | None = Field(default=None, ge=0, le=5_000)
+    rainfall_7day_antecedent_mm: float | None = Field(default=None, ge=0)
+    rainfall_event_era5_mm: float | None = Field(default=None, ge=0)
+    soil_clay_pct: float | None = Field(default=None, ge=0, le=100)
+    soil_sand_pct: float | None = Field(default=None, ge=0, le=100)
 
 
 class RainfallSimulationResponse(BaseModel):

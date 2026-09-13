@@ -32,7 +32,7 @@ MONSOON_SCENARIO = {
 }
 
 
-def dataset_sha256(path: Path) -> str:
+def file_sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as source:
         for chunk in iter(lambda: source.read(1024 * 1024), b""):
@@ -53,7 +53,7 @@ def save_bundle(result: TrainingResult, dataset_path: Path, output_dir: Path) ->
     output_dir.mkdir(parents=True, exist_ok=True)
     model_path = output_dir / "landslide_model.joblib"
     manifest_path = output_dir / "model_manifest.json"
-    joblib.dump(result.model, model_path)
+    joblib.dump(result.model, model_path, compress=("xz", 9))
     manifest: dict[str, object] = {
         "schema_version": 1,
         "model_type": type(result.model).__name__,
@@ -74,10 +74,14 @@ def save_bundle(result: TrainingResult, dataset_path: Path, output_dir: Path) ->
         "split": result.split,
         "dataset": {
             "filename": dataset_path.name,
-            "sha256": dataset_sha256(dataset_path),
+            "sha256": file_sha256(dataset_path),
             "initial_rows": result.metrics["initial_rows"],
             "clean_rows": result.metrics["clean_rows"],
             "duplicate_rows_removed": result.metrics["duplicate_rows_removed"],
+        },
+        "model": {
+            "filename": model_path.name,
+            "sha256": file_sha256(model_path),
         },
         "demo_scenarios": {
             "dry_probability": dry_probability,

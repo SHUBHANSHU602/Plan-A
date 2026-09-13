@@ -69,9 +69,11 @@ def test_training_has_disjoint_spatial_holdout_and_sensible_scenarios(tmp_path: 
     )
 
     manifest = save_bundle(result, dataset_path, tmp_path / "artifacts")
-    assert manifest["model_parameters"]["max_depth"] == 12
+    assert manifest["model_parameters"]["n_estimators"] == 50
+    assert manifest["model_parameters"]["max_depth"] == 8
     assert manifest["model_parameters"]["class_weight"] == "balanced"
     assert len(manifest["dataset"]["sha256"]) == 64
+    assert len(manifest["model"]["sha256"]) == 64
 
 
 def test_prediction_rejects_missing_features() -> None:

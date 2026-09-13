@@ -1,0 +1,145 @@
+{
+  "dataset": {
+    "clean_rows": 2305,
+    "duplicate_rows_removed": 33,
+    "filename": "GSI_NER_Fast_Enriched.csv",
+    "initial_rows": 2338,
+    "sha256": "f3589aebed1faa56551f35190f05c70856f3df9ca67a709c8cc5b5b7cf395902"
+  },
+  "demo_scenarios": {
+    "dry_probability": 0.159585656570839,
+    "monsoon_probability": 0.5891211014829535
+  },
+  "explanation_method": "transparent_threshold_heuristic_not_shap",
+  "feature_importances": {
+    "Aspect_deg": 0.0246935109081199,
+    "Elevation_m": 0.2378199376788287,
+    "Rainfall_7day_antecedent_mm": 0.09957183234551412,
+    "Rainfall_Event_ERA5_mm": 0.060143420972809586,
+    "Rainfall_mm": 0.10937725401844536,
+    "Slope_deg": 0.17362941532105927,
+    "Soil_Clay_pct": 0.13081974350864323,
+    "Soil_Sand_pct": 0.16394488524657988
+  },
+  "feature_names": [
+    "Elevation_m",
+    "Slope_deg",
+    "Aspect_deg",
+    "Rainfall_mm",
+    "Rainfall_7day_antecedent_mm",
+    "Rainfall_Event_ERA5_mm",
+    "Soil_Clay_pct",
+    "Soil_Sand_pct"
+  ],
+  "feature_stats": {
+    "Aspect_deg": {
+      "max": 359.5013668,
+      "median": 182.1653909,
+      "min": 0.0,
+      "p25": 93.6402772,
+      "p75": 265.3672554
+    },
+    "Elevation_m": {
+      "max": 5516.0,
+      "median": 793.0,
+      "min": 5.0,
+      "p25": 282.0,
+      "p75": 1065.0
+    },
+    "Rainfall_7day_antecedent_mm": {
+      "max": 1515.9,
+      "median": 97.57,
+      "min": 0.0,
+      "p25": 58.0,
+      "p75": 192.6
+    },
+    "Rainfall_Event_ERA5_mm": {
+      "max": 425.6,
+      "median": 30.0,
+      "min": 0.0,
+      "p25": 10.58,
+      "p75": 66.6
+    },
+    "Rainfall_mm": {
+      "max": 921.0602417,
+      "median": 34.63008881,
+      "min": 0.0,
+      "p25": 7.895108223,
+      "p75": 75.68215179
+    },
+    "Slope_deg": {
+      "max": 89.88324718,
+      "median": 20.1587717,
+      "min": 0.0,
+      "p25": 8.648995105,
+      "p75": 28.26948692
+    },
+    "Soil_Clay_pct": {
+      "max": 42.5,
+      "median": 29.5,
+      "min": 14.0,
+      "p25": 28.3,
+      "p75": 31.3
+    },
+    "Soil_Sand_pct": {
+      "max": 54.4,
+      "median": 33.8,
+      "min": 16.6,
+      "p25": 29.1,
+      "p75": 37.4
+    }
+  },
+  "metrics": {
+    "accuracy": 0.688953488372093,
+    "clean_rows": 2305,
+    "confusion_matrix": [
+      [
+        176,
+        39
+      ],
+      [
+        68,
+        61
+      ]
+    ],
+    "duplicate_rows_removed": 33,
+    "f1": 0.5327510917030568,
+    "false_negatives": 68,
+    "false_positives": 39,
+    "initial_rows": 2338,
+    "pr_auc": 0.6228855950150501,
+    "precision": 0.61,
+    "recall": 0.4728682170542636,
+    "roc_auc": 0.7768884081485488,
+    "test_samples": 344,
+    "train_samples": 1961
+  },
+  "model": {
+    "filename": "landslide_model.joblib",
+    "sha256": "75560de7d06015c09565c92e1a1b48e034900aa441c74b3e302c52b55b8db3fb"
+  },
+  "model_parameters": {
+    "class_weight": "balanced",
+    "max_depth": 8,
+    "min_samples_leaf": 3,
+    "n_estimators": 50,
+    "random_state": 42
+  },
+  "model_type": "RandomForestClassifier",
+  "runtime": {
+    "joblib": "1.5.3",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "python": "3.12.14",
+    "scikit_learn": "1.8.0"
+  },
+  "schema_version": 1,
+  "split": {
+    "cell_size_degrees": 0.25,
+    "group_overlap": [],
+    "random_state": 42,
+    "strategy": "spatial_group_holdout",
+    "test_groups": 69,
+    "train_groups": 276
+  }
+}
