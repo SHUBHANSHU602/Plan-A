@@ -12,8 +12,10 @@ from app.models import (  # noqa: F401
     AlertEvent,
     Asset,
     NotificationSubscription,
+    RainfallObservation,
     RiskCell,
     RiskSnapshot,
+    SimulationRun,
 )
 
 config = context.config

@@ -34,6 +34,12 @@ async def assert_database_schema() -> None:
             alert_deliveries_table = await connection.scalar(
                 text("SELECT to_regclass('public.alert_deliveries')")
             )
+            rainfall_observations_table = await connection.scalar(
+                text("SELECT to_regclass('public.rainfall_observations')")
+            )
+            simulation_runs_table = await connection.scalar(
+                text("SELECT to_regclass('public.simulation_runs')")
+            )
 
             await connection.execute(
                 text(
@@ -83,6 +89,8 @@ async def assert_database_schema() -> None:
         assert risk_snapshots_table == "risk_snapshots"
         assert notification_subscriptions_table == "notification_subscriptions"
         assert alert_deliveries_table == "alert_deliveries"
+        assert rainfall_observations_table == "rainfall_observations"
+        assert simulation_runs_table == "simulation_runs"
         assert stored_probability == pytest.approx(0.87)
     finally:
         await engine.dispose()
