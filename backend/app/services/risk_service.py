@@ -65,6 +65,10 @@ class RiskService:
             slope_deg=cell.slope_deg,
             aspect_deg=cell.aspect_deg,
             rainfall_mm=request.rainfall_mm,
+            rainfall_7day_antecedent_mm=request.rainfall_7day_antecedent_mm,
+            rainfall_event_era5_mm=request.rainfall_event_era5_mm,
+            soil_clay_pct=request.soil_clay_pct,
+            soil_sand_pct=request.soil_sand_pct,
         )
         model_prediction = await self._model_gateway.predict(features)
         risk_level = self._classifier.classify(model_prediction.probability)

@@ -1,4 +1,6 @@
 from functools import lru_cache
+from pathlib import Path
+from typing import Literal
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -9,6 +11,13 @@ class Settings(BaseSettings):
     app_version: str = "0.2.0"
     database_url: str = "postgresql+psycopg://plan_a:plan_a_local@localhost:5432/plan_a"
     database_echo: bool = False
+    model_provider: Literal["mock", "artifact"] = "mock"
+    model_artifact_path: Path = (
+        Path(__file__).resolve().parents[1] / "model_artifacts" / "landslide_model.joblib"
+    )
+    model_manifest_path: Path = (
+        Path(__file__).resolve().parents[1] / "model_artifacts" / "model_manifest.json"
+    )
     risk_medium_threshold: float = 0.40
     risk_high_threshold: float = 0.65
     risk_critical_threshold: float = 0.80

@@ -42,9 +42,13 @@ def test_cleaning_rejects_invalid_rows_and_requires_both_classes() -> None:
     frame = synthetic_frame()
     invalid = frame.iloc[[0]].copy()
     invalid["Slope_deg"] = 120
-    cleaned = clean_dataset(pd.concat([frame, invalid], ignore_index=True), FEATURE_COLUMNS)
-    assert cleaned.dropped_rows == 1
+    duplicate = frame.iloc[[1]].copy()
+    cleaned = clean_dataset(
+        pd.concat([frame, invalid, duplicate], ignore_index=True), FEATURE_COLUMNS
+    )
+    assert cleaned.dropped_rows == 2
     assert set(cleaned.class_counts) == {0, 1}
+    assert cleaned.duplicate_rows == 1
 
     with pytest.raises(ValueError, match="both"):
         clean_dataset(frame.loc[frame["Landslide_Label"] == 1], FEATURE_COLUMNS)
@@ -65,9 +69,11 @@ def test_training_has_disjoint_spatial_holdout_and_sensible_scenarios(tmp_path: 
     )
 
     manifest = save_bundle(result, dataset_path, tmp_path / "artifacts")
-    assert manifest["model_parameters"]["max_depth"] == 12
+    assert manifest["model_parameters"]["n_estimators"] == 50
+    assert manifest["model_parameters"]["max_depth"] == 8
     assert manifest["model_parameters"]["class_weight"] == "balanced"
     assert len(manifest["dataset"]["sha256"]) == 64
+    assert len(manifest["model"]["sha256"]) == 64
 
 
 def test_prediction_rejects_missing_features() -> None:

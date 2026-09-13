@@ -72,8 +72,8 @@ def train_and_evaluate(
     y_test = frame.iloc[test_index][TARGET_COLUMN]
 
     model = RandomForestClassifier(
-        n_estimators=300,
-        max_depth=12,
+        n_estimators=50,
+        max_depth=8,
         min_samples_leaf=3,
         class_weight="balanced",
         random_state=random_state,
@@ -96,6 +96,9 @@ def train_and_evaluate(
         "false_negatives": int(matrix[1, 0]),
         "train_samples": int(len(train_index)),
         "test_samples": int(len(test_index)),
+        "initial_rows": data.initial_rows,
+        "clean_rows": int(len(frame)),
+        "duplicate_rows_removed": data.duplicate_rows,
     }
     importances = {
         feature: float(importance)
