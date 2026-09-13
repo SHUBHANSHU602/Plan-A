@@ -1,6 +1,9 @@
 from app.db.transaction import TransactionManager
 from app.models.risk import RiskSnapshot
+from app.notifications.dispatcher import NotificationDispatcher
 from app.repositories.risk import RiskCellRepository, RiskSnapshotRepository
+from app.schemas.alert import AlertAction, AlertEventType
+from app.schemas.notification import NotificationEvent
 from app.schemas.prediction import ModelFeatures, PredictionRequest, PredictionResponse
 from app.services.alert_service import AlertService
 from app.services.model_gateway import ModelGateway
@@ -30,6 +33,7 @@ class RiskService:
         classifier: RiskClassifier,
         alert_service: AlertService,
         transaction: TransactionManager,
+        notification_dispatcher: NotificationDispatcher,
     ) -> None:
         self._cell_repository = cell_repository
         self._snapshot_repository = snapshot_repository
@@ -37,6 +41,7 @@ class RiskService:
         self._classifier = classifier
         self._alert_service = alert_service
         self._transaction = transaction
+        self._notification_dispatcher = notification_dispatcher
 
     async def predict(self, request: PredictionRequest) -> PredictionResponse:
         feature_set = await self._cell_repository.get_feature_set(request.cell_code)
@@ -63,6 +68,7 @@ class RiskService:
         )
         model_prediction = await self._model_gateway.predict(features)
         risk_level = self._classifier.classify(model_prediction.probability)
+        notification_event = None
 
         try:
             snapshot = await self._snapshot_repository.save(
@@ -76,10 +82,30 @@ class RiskService:
                 )
             )
             alert = await self._alert_service.evaluate(snapshot, cell.cell_code)
+            if alert is not None and alert.action != AlertAction.SUPPRESSED:
+                if alert.event_id is None or alert.event_created_at is None:
+                    raise RuntimeError("emitted alert is missing its audit event")
+                notification_event = NotificationEvent(
+                    event_id=alert.event_id,
+                    alert_id=alert.alert_id,
+                    event_type=AlertEventType(alert.action.value),
+                    occurred_at=alert.event_created_at,
+                    payload={
+                        "cell_id": str(cell.id),
+                        "cell_code": cell.cell_code,
+                        "severity": alert.severity.value,
+                        "status": "ACTIVE",
+                        "probability": snapshot.probability,
+                        "drivers": snapshot.drivers,
+                    },
+                )
             await self._transaction.commit()
         except Exception:
             await self._transaction.rollback()
             raise
+
+        if notification_event is not None:
+            await self._notification_dispatcher.dispatch(notification_event)
 
         return PredictionResponse(
             snapshot_id=snapshot.id,

@@ -103,8 +103,9 @@ class AlertService:
                 alert.last_emitted_at = now
 
         await self._repository.save(alert)
+        event = None
         if action != AlertAction.SUPPRESSED:
-            await self._event_repository.add(
+            event = await self._event_repository.add(
                 AlertEvent(
                     alert_id=alert.id,
                     event_type=action.value,
@@ -118,6 +119,8 @@ class AlertService:
             )
         return AlertEvaluation(
             alert_id=alert.id,
+            event_id=event.id if event else None,
+            event_created_at=event.created_at if event else None,
             action=action,
             severity=severity,
             occurrence_count=alert.occurrence_count,
