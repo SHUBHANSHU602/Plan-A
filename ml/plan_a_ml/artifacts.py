@@ -75,6 +75,9 @@ def save_bundle(result: TrainingResult, dataset_path: Path, output_dir: Path) ->
         "dataset": {
             "filename": dataset_path.name,
             "sha256": dataset_sha256(dataset_path),
+            "initial_rows": result.metrics["initial_rows"],
+            "clean_rows": result.metrics["clean_rows"],
+            "duplicate_rows_removed": result.metrics["duplicate_rows_removed"],
         },
         "demo_scenarios": {
             "dry_probability": dry_probability,

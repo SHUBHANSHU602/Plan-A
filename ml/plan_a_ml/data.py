@@ -24,6 +24,7 @@ class CleanedDataset:
     frame: pd.DataFrame
     initial_rows: int
     dropped_rows: int
+    duplicate_rows: int
     class_counts: dict[int, int]
 
 
@@ -49,6 +50,9 @@ def clean_dataset(frame: pd.DataFrame, feature_columns: tuple[str, ...]) -> Clea
             valid &= selected[column].between(minimum, maximum)
 
     selected = selected.loc[valid].copy()
+    rows_before_deduplication = len(selected)
+    selected = selected.drop_duplicates(subset=sorted(required)).copy()
+    duplicate_rows = rows_before_deduplication - len(selected)
     selected[TARGET_COLUMN] = selected[TARGET_COLUMN].astype(int)
     class_counts = {
         int(label): int(count) for label, count in selected[TARGET_COLUMN].value_counts().items()
@@ -62,6 +66,7 @@ def clean_dataset(frame: pd.DataFrame, feature_columns: tuple[str, ...]) -> Clea
         frame=selected,
         initial_rows=initial_rows,
         dropped_rows=initial_rows - len(selected),
+        duplicate_rows=duplicate_rows,
         class_counts=class_counts,
     )
 

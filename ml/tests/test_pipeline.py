@@ -42,9 +42,13 @@ def test_cleaning_rejects_invalid_rows_and_requires_both_classes() -> None:
     frame = synthetic_frame()
     invalid = frame.iloc[[0]].copy()
     invalid["Slope_deg"] = 120
-    cleaned = clean_dataset(pd.concat([frame, invalid], ignore_index=True), FEATURE_COLUMNS)
-    assert cleaned.dropped_rows == 1
+    duplicate = frame.iloc[[1]].copy()
+    cleaned = clean_dataset(
+        pd.concat([frame, invalid, duplicate], ignore_index=True), FEATURE_COLUMNS
+    )
+    assert cleaned.dropped_rows == 2
     assert set(cleaned.class_counts) == {0, 1}
+    assert cleaned.duplicate_rows == 1
 
     with pytest.raises(ValueError, match="both"):
         clean_dataset(frame.loc[frame["Landslide_Label"] == 1], FEATURE_COLUMNS)
