@@ -42,3 +42,8 @@ def test_risk_thresholds_must_be_strictly_ordered() -> None:
 def test_alert_settings_reject_unsafe_limits(field: str, value: float) -> None:
     with pytest.raises(ValidationError):
         Settings(_env_file=None, **{field: value})
+
+
+def test_fcm_requires_project_id_when_enabled() -> None:
+    with pytest.raises(ValidationError, match="fcm_project_id is required"):
+        Settings(_env_file=None, fcm_enabled=True, fcm_project_id=None)

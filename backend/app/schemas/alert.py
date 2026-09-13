@@ -50,6 +50,8 @@ class AlertEvaluation(BaseModel):
     event_created_at: datetime | None = None
     action: AlertAction
     severity: AlertSeverity
+    title: str
+    message: str
     occurrence_count: int = Field(ge=1)
 
 
