@@ -1,3 +1,6 @@
+import pytest
+from pydantic import ValidationError
+
 from app.core.config import Settings
 from app.main import create_app
 
@@ -17,3 +20,30 @@ def test_application_metadata_comes_from_settings() -> None:
 
     assert application.title == "Plan-A API"
     assert application.version == "0.2.0"
+
+
+def test_risk_thresholds_must_be_strictly_ordered() -> None:
+    with pytest.raises(ValidationError, match="medium < high < critical"):
+        Settings(
+            _env_file=None,
+            risk_medium_threshold=0.7,
+            risk_high_threshold=0.6,
+            risk_critical_threshold=0.8,
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("alert_exposure_radius_m", 50_001),
+        ("alert_dedup_cooldown_minutes", 0),
+    ],
+)
+def test_alert_settings_reject_unsafe_limits(field: str, value: float) -> None:
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, **{field: value})
+
+
+def test_fcm_requires_project_id_when_enabled() -> None:
+    with pytest.raises(ValidationError, match="fcm_project_id is required"):
+        Settings(_env_file=None, fcm_enabled=True, fcm_project_id=None)
