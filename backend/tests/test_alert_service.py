@@ -110,8 +110,11 @@ async def assert_repeated_and_escalated_alert_actions() -> None:
     escalated = await service.evaluate(critical_snapshot, "A17")
 
     assert first.action == AlertAction.CREATED
+    assert first.event_id == event_repository.events[0].id
     assert repeated.action == AlertAction.SUPPRESSED
+    assert repeated.event_id is None
     assert escalated.action == AlertAction.ESCALATED
+    assert escalated.event_id == event_repository.events[1].id
     assert escalated.severity == AlertSeverity.CRITICAL
     assert repository.alert.occurrence_count == 3
     assert repository.alert.peak_probability == 0.87

@@ -5,6 +5,7 @@ from uuid import UUID
 
 from app.db.transaction import TransactionManager
 from app.models.alert import Alert, AlertEvent
+from app.notifications.dispatcher import NotificationDispatcher
 from app.repositories.alert import AlertEventRepository, AlertRecord, AlertRepository
 from app.schemas.alert import (
     AlertActorType,
@@ -18,6 +19,7 @@ from app.schemas.alert import (
     AlertTransitionRequest,
     AlertTransitionResponse,
 )
+from app.schemas.notification import NotificationEvent
 
 EXPECTED_PREVIOUS_STATUS = {
     AlertStatus.ACKNOWLEDGED: AlertStatus.ACTIVE,
@@ -49,10 +51,12 @@ class AlertManagementService:
         alert_repository: AlertRepository,
         event_repository: AlertEventRepository,
         transaction: TransactionManager,
+        notification_dispatcher: NotificationDispatcher,
     ) -> None:
         self._alert_repository = alert_repository
         self._event_repository = event_repository
         self._transaction = transaction
+        self._notification_dispatcher = notification_dispatcher
 
     async def list_alerts(
         self,
@@ -129,8 +133,7 @@ class AlertManagementService:
                     note=request.note,
                 )
             )
-            await self._transaction.commit()
-            return AlertTransitionResponse(
+            response = AlertTransitionResponse(
                 alert_id=alert.id,
                 previous_status=current,
                 status=target,
@@ -138,9 +141,24 @@ class AlertManagementService:
                 event_id=event.id,
                 updated_at=alert.updated_at,
             )
+            notification_event = NotificationEvent(
+                event_id=event.id,
+                alert_id=alert.id,
+                event_type=AlertEventType(event.event_type),
+                occurred_at=event.created_at,
+                payload={
+                    "previous_status": current.value,
+                    "status": target.value,
+                    "severity": alert.severity,
+                },
+            )
+            await self._transaction.commit()
         except Exception:
             await self._transaction.rollback()
             raise
+
+        await self._notification_dispatcher.dispatch(notification_event)
+        return response
 
     @staticmethod
     def _to_summary(record: AlertRecord) -> AlertSummary:

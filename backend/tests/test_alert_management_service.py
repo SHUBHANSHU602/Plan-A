@@ -63,6 +63,18 @@ class StubTransaction:
         self.rollbacks += 1
 
 
+class StubNotificationDispatcher:
+    def __init__(self, transaction: StubTransaction) -> None:
+        self.transaction = transaction
+        self.events = []
+        self.commit_counts = []
+
+    async def dispatch(self, event):
+        self.events.append(event)
+        self.commit_counts.append(self.transaction.commits)
+        return []
+
+
 def make_alert(status="ACTIVE", last_seen_at=None):
     now = last_seen_at or datetime(2026, 9, 12, 10, 0, tzinfo=UTC)
     return SimpleNamespace(
@@ -90,7 +102,8 @@ async def assert_lifecycle_is_guarded_and_idempotent() -> None:
     repository = StubAlertRepository(alert=alert)
     events = StubEventRepository()
     transaction = StubTransaction()
-    service = AlertManagementService(repository, events, transaction)
+    notifications = StubNotificationDispatcher(transaction)
+    service = AlertManagementService(repository, events, transaction, notifications)
     request = AlertTransitionRequest(actor_reference="  district-admin  ", note="Reviewed")
 
     acknowledged = await service.transition(alert.id, AlertStatus.ACKNOWLEDGED, request)
@@ -102,6 +115,8 @@ async def assert_lifecycle_is_guarded_and_idempotent() -> None:
     assert len(events.events) == 1
     assert events.events[0].actor_reference == "district-admin"
     assert transaction.commits == 2
+    assert [event.event_type for event in notifications.events] == ["ACKNOWLEDGED"]
+    assert notifications.commit_counts == [1]
 
     with pytest.raises(InvalidAlertTransitionError):
         await service.transition(alert.id, AlertStatus.RESOLVED, request)
@@ -124,7 +139,13 @@ async def assert_cursor_pagination_is_stable() -> None:
         cell_code="A2",
     )
     repository = StubAlertRepository(records=[newer, older])
-    service = AlertManagementService(repository, StubEventRepository(), StubTransaction())
+    transaction = StubTransaction()
+    service = AlertManagementService(
+        repository,
+        StubEventRepository(),
+        transaction,
+        StubNotificationDispatcher(transaction),
+    )
 
     page = await service.list_alerts(
         status=AlertStatus.ACTIVE,
@@ -146,8 +167,12 @@ def test_cursor_pagination_is_stable() -> None:
 
 
 async def assert_invalid_cursor_is_rejected() -> None:
+    transaction = StubTransaction()
     service = AlertManagementService(
-        StubAlertRepository(), StubEventRepository(), StubTransaction()
+        StubAlertRepository(),
+        StubEventRepository(),
+        transaction,
+        StubNotificationDispatcher(transaction),
     )
 
     with pytest.raises(InvalidAlertCursorError):

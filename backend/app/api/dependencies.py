@@ -7,6 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.db.session import get_db_session
 from app.db.transaction import TransactionManager
+from app.notifications.dashboard import DashboardNotificationProvider
+from app.notifications.dispatcher import NotificationDispatcher
+from app.realtime.alert_hub import alert_websocket_hub
 from app.repositories.alert import AlertEventRepository, AlertRepository
 from app.repositories.exposure import AssetRepository
 from app.repositories.risk import RiskCellRepository, RiskSnapshotRepository
@@ -19,6 +22,9 @@ from app.services.risk_classifier import RiskClassifier, RiskThresholds
 from app.services.risk_service import RiskService
 
 model_gateway = MockModelGateway()
+notification_dispatcher = NotificationDispatcher(
+    [DashboardNotificationProvider(alert_websocket_hub)]
+)
 
 
 def get_model_gateway() -> ModelGateway:
@@ -52,6 +58,7 @@ def get_risk_service(
             dedup_cooldown=timedelta(minutes=settings.alert_dedup_cooldown_minutes),
         ),
         transaction=TransactionManager(session),
+        notification_dispatcher=notification_dispatcher,
     )
 
 
@@ -71,4 +78,5 @@ def get_alert_management_service(
         alert_repository=AlertRepository(session),
         event_repository=AlertEventRepository(session),
         transaction=TransactionManager(session),
+        notification_dispatcher=notification_dispatcher,
     )
