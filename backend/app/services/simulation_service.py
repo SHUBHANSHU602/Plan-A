@@ -75,7 +75,14 @@ class SimulationService:
 
         try:
             prediction = await self._risk_service.predict(
-                PredictionRequest(cell_code=cell.cell_code, rainfall_mm=simulated)
+                PredictionRequest(
+                    cell_code=cell.cell_code,
+                    rainfall_mm=simulated,
+                    rainfall_7day_antecedent_mm=request.rainfall_7day_antecedent_mm,
+                    rainfall_event_era5_mm=request.rainfall_event_era5_mm,
+                    soil_clay_pct=request.soil_clay_pct,
+                    soil_sand_pct=request.soil_sand_pct,
+                )
             )
         except Exception as error:
             run = await self._run_repository.get(run_id)

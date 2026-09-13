@@ -26,7 +26,7 @@ from app.services.alert_service import AlertService
 from app.services.delivery_query_service import DeliveryQueryService
 from app.services.exposure_service import ExposureService
 from app.services.fcm_delivery_service import FcmDeliveryService
-from app.services.model_gateway import MockModelGateway, ModelGateway
+from app.services.model_gateway import ArtifactModelGateway, MockModelGateway, ModelGateway
 from app.services.notification_subscription_service import NotificationSubscriptionService
 from app.services.rainfall_ingestion_service import RainfallIngestionService
 from app.services.rainfall_processing_service import RainfallProcessingService
@@ -35,7 +35,11 @@ from app.services.risk_service import RiskService
 from app.services.simulation_service import SimulationService
 
 settings = get_settings()
-model_gateway = MockModelGateway()
+model_gateway = (
+    ArtifactModelGateway(settings.model_artifact_path, settings.model_manifest_path)
+    if settings.model_provider == "artifact"
+    else MockModelGateway()
+)
 firebase_client = (
     FirebaseAdminClient(settings.fcm_project_id, settings.fcm_request_timeout_seconds)
     if settings.fcm_enabled and settings.fcm_project_id

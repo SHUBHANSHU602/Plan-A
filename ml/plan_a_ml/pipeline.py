@@ -72,8 +72,8 @@ def train_and_evaluate(
     y_test = frame.iloc[test_index][TARGET_COLUMN]
 
     model = RandomForestClassifier(
-        n_estimators=300,
-        max_depth=12,
+        n_estimators=50,
+        max_depth=8,
         min_samples_leaf=3,
         class_weight="balanced",
         random_state=random_state,

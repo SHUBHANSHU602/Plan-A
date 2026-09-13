@@ -18,6 +18,10 @@ class RiskLevel(StrEnum):
 class PredictionRequest(BaseModel):
     cell_code: str = Field(min_length=1, max_length=64)
     rainfall_mm: float = Field(ge=0)
+    rainfall_7day_antecedent_mm: float | None = Field(default=None, ge=0)
+    rainfall_event_era5_mm: float | None = Field(default=None, ge=0)
+    soil_clay_pct: float | None = Field(default=None, ge=0, le=100)
+    soil_sand_pct: float | None = Field(default=None, ge=0, le=100)
 
 
 class ModelFeatures(BaseModel):
@@ -27,6 +31,10 @@ class ModelFeatures(BaseModel):
     slope_deg: float = Field(ge=0, le=90)
     aspect_deg: float = Field(ge=0, lt=360)
     rainfall_mm: float = Field(ge=0)
+    rainfall_7day_antecedent_mm: float | None = Field(default=None, ge=0)
+    rainfall_event_era5_mm: float | None = Field(default=None, ge=0)
+    soil_clay_pct: float | None = Field(default=None, ge=0, le=100)
+    soil_sand_pct: float | None = Field(default=None, ge=0, le=100)
 
 
 class ModelPrediction(BaseModel):

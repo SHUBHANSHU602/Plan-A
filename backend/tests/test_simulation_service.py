@@ -80,12 +80,21 @@ async def assert_simulation_uses_latest_baseline_and_real_risk_service() -> None
     )
 
     response = await service.simulate(
-        RainfallSimulationRequest(cell_code="A17", rainfall_multiplier=3)
+        RainfallSimulationRequest(
+            cell_code="A17",
+            rainfall_multiplier=3,
+            rainfall_7day_antecedent_mm=240,
+            rainfall_event_era5_mm=135,
+            soil_clay_pct=35.5,
+            soil_sand_pct=28,
+        )
     )
 
     assert response.baseline_rainfall_mm == 30
     assert response.simulated_rainfall_mm == 90
     assert risk_service.request.rainfall_mm == 90
+    assert risk_service.request.rainfall_7day_antecedent_mm == 240
+    assert risk_service.request.soil_clay_pct == 35.5
     assert response.prediction.risk_level == RiskLevel.HIGH
     assert transaction.commits == 2
 
