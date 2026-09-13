@@ -46,6 +46,7 @@ class Alert(Base):
             unique=True,
             postgresql_where=text(OPEN_ALERT_PREDICATE),
         ),
+        Index("ix_alerts_created_id", "created_at", "id"),
         Index("ix_alerts_status_severity_last_seen", "status", "severity", "last_seen_at"),
     )
 
@@ -78,3 +79,37 @@ class Alert(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+class AlertEvent(Base):
+    __tablename__ = "alert_events"
+    __table_args__ = (
+        CheckConstraint(
+            "event_type IN ('CREATED', 'REFRESHED', 'ESCALATED', "
+            "'ACKNOWLEDGED', 'VERIFIED', 'RESOLVED')",
+            name="event_type_valid",
+        ),
+        CheckConstraint(
+            "from_status IN ('ACTIVE', 'ACKNOWLEDGED', 'VERIFIED', 'RESOLVED')",
+            name="from_status_valid",
+        ),
+        CheckConstraint(
+            "to_status IN ('ACTIVE', 'ACKNOWLEDGED', 'VERIFIED', 'RESOLVED')",
+            name="to_status_valid",
+        ),
+        CheckConstraint(
+            "actor_type IN ('SYSTEM', 'CLIENT')",
+            name="actor_type_valid",
+        ),
+        Index("ix_alert_events_alert_created", "alert_id", "created_at"),
+    )
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    alert_id: Mapped[UUID] = mapped_column(ForeignKey("alerts.id", ondelete="CASCADE"))
+    event_type: Mapped[str] = mapped_column(String(24))
+    from_status: Mapped[str] = mapped_column(String(20))
+    to_status: Mapped[str] = mapped_column(String(20))
+    actor_type: Mapped[str] = mapped_column(String(16))
+    actor_reference: Mapped[str] = mapped_column(String(120))
+    note: Mapped[str | None] = mapped_column(String(500))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

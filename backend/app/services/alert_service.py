@@ -1,9 +1,9 @@
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 
-from app.models.alert import Alert
+from app.models.alert import Alert, AlertEvent
 from app.models.risk import RiskSnapshot
-from app.repositories.alert import AlertRepository
+from app.repositories.alert import AlertEventRepository, AlertRepository
 from app.repositories.exposure import AssetRepository
 from app.schemas.alert import AlertAction, AlertEvaluation, AlertSeverity
 from app.schemas.exposure import AssetType
@@ -24,6 +24,7 @@ class AlertService:
     def __init__(
         self,
         repository: AlertRepository,
+        event_repository: AlertEventRepository,
         asset_repository: AssetRepository,
         policy: AlertPolicy,
         exposure_radius_m: float,
@@ -31,6 +32,7 @@ class AlertService:
         clock: Callable[[], datetime] = utc_now,
     ) -> None:
         self._repository = repository
+        self._event_repository = event_repository
         self._asset_repository = asset_repository
         self._policy = policy
         self._exposure_radius_m = exposure_radius_m
@@ -101,6 +103,19 @@ class AlertService:
                 alert.last_emitted_at = now
 
         await self._repository.save(alert)
+        if action != AlertAction.SUPPRESSED:
+            await self._event_repository.add(
+                AlertEvent(
+                    alert_id=alert.id,
+                    event_type=action.value,
+                    from_status=alert.status,
+                    to_status=alert.status,
+                    actor_type="SYSTEM",
+                    actor_reference="alert-engine",
+                    note=None,
+                    created_at=now,
+                )
+            )
         return AlertEvaluation(
             alert_id=alert.id,
             action=action,
