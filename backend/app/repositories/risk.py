@@ -20,6 +20,9 @@ class RiskCellRepository:
     async def get_by_code(self, cell_code: str) -> RiskCell | None:
         return await self._session.scalar(select(RiskCell).where(RiskCell.cell_code == cell_code))
 
+    async def get_by_id(self, cell_id) -> RiskCell | None:
+        return await self._session.get(RiskCell, cell_id)
+
     async def get_feature_set(self, cell_code: str) -> RiskCellFeatureSet | None:
         centroid = func.ST_Centroid(RiskCell.geometry)
         statement = select(
@@ -53,3 +56,12 @@ class RiskSnapshotRepository:
             await self._session.rollback()
             raise
         return snapshot
+
+    async def get_latest_for_cell(self, cell_id) -> RiskSnapshot | None:
+        statement = (
+            select(RiskSnapshot)
+            .where(RiskSnapshot.cell_id == cell_id)
+            .order_by(RiskSnapshot.recorded_at.desc(), RiskSnapshot.id.desc())
+            .limit(1)
+        )
+        return await self._session.scalar(statement)

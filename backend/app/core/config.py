@@ -14,6 +14,18 @@ class Settings(BaseSettings):
     risk_critical_threshold: float = 0.80
     alert_exposure_radius_m: float = Field(default=2_000, gt=0, le=50_000)
     alert_dedup_cooldown_minutes: int = Field(default=30, ge=1, le=1_440)
+    fcm_enabled: bool = False
+    fcm_project_id: str | None = None
+    fcm_max_attempts: int = Field(default=5, ge=1, le=10)
+    fcm_retry_base_seconds: int = Field(default=30, ge=1, le=3_600)
+    fcm_request_timeout_seconds: int = Field(default=15, ge=1, le=120)
+    scheduler_enabled: bool = True
+    rainfall_processing_interval_seconds: int = Field(default=60, ge=5, le=3_600)
+    notification_retry_interval_seconds: int = Field(default=30, ge=5, le=3_600)
+    scheduler_batch_size: int = Field(default=100, ge=1, le=1_000)
+    rainfall_processing_max_attempts: int = Field(default=3, ge=1, le=10)
+    rainfall_processing_retry_seconds: int = Field(default=30, ge=1, le=3_600)
+    rainfall_processing_claim_timeout_seconds: int = Field(default=300, ge=30, le=3_600)
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -32,6 +44,8 @@ class Settings(BaseSettings):
             raise ValueError(
                 "risk thresholds must be ordered between zero and one: medium < high < critical"
             )
+        if self.fcm_enabled and not self.fcm_project_id:
+            raise ValueError("fcm_project_id is required when FCM is enabled")
         return self
 
 

@@ -56,6 +56,8 @@ class StubAlertService:
             event_created_at=datetime.now(UTC) if emitted else None,
             action=self.action,
             severity=AlertSeverity.CRITICAL,
+            title="Critical Landslide Risk",
+            message="Elevated risk detected.",
             occurrence_count=1,
         )
 

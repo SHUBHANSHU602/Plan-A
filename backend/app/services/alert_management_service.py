@@ -150,6 +150,8 @@ class AlertManagementService:
                     "previous_status": current.value,
                     "status": target.value,
                     "severity": alert.severity,
+                    "title": alert.title,
+                    "message": alert.message,
                 },
             )
             await self._transaction.commit()
